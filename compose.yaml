@@ -11,5 +11,18 @@ services:
     volumes:
       - database-data:/var/lib/postgresql/data
     
+  migration-service:
+    image: migrate/migrate
+    volumes:
+      - ./migrations:/migrations
+    command:
+      [
+        "-path",
+        "/migrations",
+        "-database",
+        "postgres://$DB_USER:$DB_PASS@database:5432/$DB_NAME?sslmode=disable",
+        "up",
+      ]
+
 volumes:
   database-data:
