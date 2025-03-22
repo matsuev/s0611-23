@@ -6,3 +6,6 @@ tasks:
 
   down:
     cmd: migrate -source file://. -database postgres://$DB_USER:$DB_PASS@$DB_ADDR/$DB_NAME?sslmode=disable down {{.CLI_ARGS}}
+
+  version:
+    cmd: migrate -source file://. -database postgres://$DB_USER:$DB_PASS@$DB_ADDR/$DB_NAME?sslmode=disable version

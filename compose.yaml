@@ -10,18 +10,28 @@ services:
       - 127.0.0.1:5432:5432
     volumes:
       - database-data:/var/lib/postgresql/data
-    
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-d", "$DB_NAME"]
+      retries: 10
+      interval: 5s
+      timeout: 5s
+      start_period: 10s
+
   migration-service:
     image: migrate/migrate
     volumes:
       - ./migrations:/migrations
+    depends_on:
+      database:
+        condition: service_healthy
     command:
       [
         "-path",
         "/migrations",
         "-database",
         "postgres://$DB_USER:$DB_PASS@database:5432/$DB_NAME?sslmode=disable",
-        "up",
+        "goto",
+        "$DB_VERSION",
       ]
 
 volumes:
