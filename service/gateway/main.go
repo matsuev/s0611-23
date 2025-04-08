@@ -10,7 +10,6 @@ func main() {
 	api := fiber.New()
 
 	api.Post("/connect", connectHandler)
-	api.Post("/subscribe", subscribeHandler)
 
 	if err := api.Listen("127.0.0.1:6080"); err != nil {
 		log.Fatalln(err)

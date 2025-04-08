@@ -1,6 +1,5 @@
 {
    "client": {
-      "allow_anonymous_connect_without_token": true,
       "allowed_origins": [
          "*"
       ],
@@ -8,10 +7,6 @@
          "connect": {
             "enabled": true,
             "endpoint": "http://host.docker.internal:6080/connect"
-         },
-         "subscribe": {
-            "enabled": true,
-            "endpoint": "http://host.docker.internal:6080/subscribe"
          }
       }
    },
