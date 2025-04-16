@@ -1,74 +1,38 @@
 package main
 
 import (
+	"context"
 	"log"
+	"net"
+	"s0611-23/internal/demobase"
+	"s0611-23/internal/proxyproto"
 
-	"github.com/gofiber/fiber/v2"
+	"github.com/jackc/pgx/v5"
+	"google.golang.org/grpc"
 )
 
+const connStr = "postgres://postgresuser:postgrespass@127.0.0.1:5432/demobase?sslmode=disable"
+
 func main() {
-	api := fiber.New()
-
-	api.Post("/connect", connectHandler)
-
-	if err := api.Listen("127.0.0.1:6080"); err != nil {
+	listener, err := net.Listen("tcp", "127.0.0.1:10000")
+	if err != nil {
 		log.Fatalln(err)
 	}
-}
 
-// ConnectRequest ...
-type ConnectRequest struct {
-	Data RequestData `json:"data"`
-}
+	srv := grpc.NewServer()
 
-// RequestData ...
-type RequestData struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-}
-
-// ConnectResponse ...
-type ConnectResponse struct {
-	Result     *ConnectResult `json:"result,omitempty"`
-	Error      *Error         `json:"error,omitempty"`
-	Disconnect *Disconnect    `json:"disconnect,omitempty"`
-}
-
-// ConnectResult ...
-type ConnectResult struct {
-	User string `json:"user"`
-}
-
-// Error ...
-type Error struct {
-	Code    int    `json:"code"`
-	Message string `json:"message,omitempty"`
-}
-
-// Disconnect ...
-type Disconnect struct {
-	Code   int    `json:"code"`
-	Reason string `json:"reason,omitempty"`
-}
-
-// connectHandler ...
-func connectHandler(ctx *fiber.Ctx) error {
-	request := &ConnectRequest{}
-
-	ctx.BodyParser(request)
-
-	if request.Data.Username != "alex" || request.Data.Password != "qwerty" {
-		return ctx.JSON(ConnectResponse{
-			Error: &Error{
-				Code:    101,
-				Message: "unauthorized",
-			},
-		})
+	conn, err := pgx.Connect(context.Background(), connStr)
+	if err != nil {
+		log.Fatalln(err)
 	}
 
-	return ctx.JSON(ConnectResponse{
-		Result: &ConnectResult{
-			User: request.Data.Username,
-		},
-	})
+	querier := demobase.New(conn)
+
+	svc := NewService(querier)
+
+	proxyproto.RegisterCentrifugoProxyServer(srv, svc)
+
+	if err := srv.Serve(listener); err != nil {
+		log.Fatalln(err)
+	}
 }

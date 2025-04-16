@@ -6,12 +6,9 @@
       "proxy": {
          "connect": {
             "enabled": true,
-            "endpoint": "http://host.docker.internal:6080/connect"
+            "endpoint": "grpc://host.docker.internal:10000"
          }
       }
-   },
-   "http_api": {
-      "key": "my_api_key"
    },
    "admin": {
       "password": "password",
