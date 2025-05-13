@@ -38,16 +38,16 @@ server {
          return 405;
       }
 
+      if ($http_x_rpc_method = '') {
+         return 444;
+      }
+
       if ($http_authorization = '') {
          return 401;
       }
 
-      if ($http_x_rpc_method = '') {
-         return 400;
-      }
-
       if ($http_content_type != 'application/json') {
-         return 400;
+         return 444;
       }
 
       proxy_pass http://$app_route;
